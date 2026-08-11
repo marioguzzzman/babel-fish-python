@@ -21,6 +21,10 @@ class Plant:
     def grow(self) -> None:
         self.height += self.growth_rate
 
+    def get_height():
+
+    def get_age():
+
 if __name__ == "__main__":
 
     p1 = Plant("Rose", 25.0, 30, 0.8)
