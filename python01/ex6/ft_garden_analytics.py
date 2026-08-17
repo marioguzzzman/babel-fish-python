@@ -85,12 +85,11 @@ class Plant:
             return True
 
     @classmethod
-    def create_anonymous(cls, 
-                        name: str,
-                        height: float,
-                        age: int,
-                        growth_rate: float) -> "Plant":
-        return (cls, name, height, age, growth_rate)
+    def create_anonymous(cls) -> "Plant":
+        return cls(name="Unknown plant",
+                   height=0.0,
+                   age_days=0,
+                   growth_rate=0.0)
 
 class Flower(Plant):
     def __init__(self, name: str, height: float, age_days: int,
@@ -112,7 +111,7 @@ class Flower(Plant):
 
 
 class Tree(Plant):
-    
+
     class Stats(Plant.Stats):
         def __init__(self) -> None:
             super().__init__()
@@ -124,6 +123,8 @@ class Tree(Plant):
         def show_stats(self) -> None:
             super().show_stats()
             print(f" {self._shade_calls} shade")
+
+    _stats: "Tree.Stats"
 
     def __init__(self, name: str, height: float, age_days: int,
                  growth_rate: float, trunk_diameter: float) -> None:
@@ -205,10 +206,7 @@ if __name__ == "__main__":
     #new function
 
     print("=== Anonymous")
-    anonymous = Plant(name="Unknown plant",
-                    height=0.0,
-                    age_days=0,
-                    growth_rate=0.0,)
-    print("[statistics for Unknown plant]")
+    anonymous = Plant.create_anonymous()
     anonymous.show()
+    print("[statistics for Unknown plant]")
     anonymous.show_plant_stats()
