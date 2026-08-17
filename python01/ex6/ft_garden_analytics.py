@@ -78,7 +78,7 @@ class Plant:
         return self._age_days
 
     @staticmethod
-    def age_comparison(age: int) -> bool:
+    def is_older_than_year(age: int) -> bool:
         if age < 365:
             return False
         else:
@@ -163,9 +163,9 @@ if __name__ == "__main__":
 
     print("=== Check year-old")
     age = 30
-    print(f"Is {age} days more than a year? -> {Plant.age_comparison(age)}")
+    print(f"Is {age} days more than a year? -> {Plant.is_older_than_year(age)}")
     age = 400
-    print(f"Is {age} days more than a year? -> {Plant.age_comparison(age)}")
+    print(f"Is {age} days more than a year? -> {Plant.is_older_than_year(age)}")
 
     print("=== Flower")
     f1.show()
