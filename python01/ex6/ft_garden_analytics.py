@@ -84,6 +84,9 @@ class Plant:
         else:
             return True
 
+    @classmethod
+    cls()
+
 class Flower(Plant):
     def __init__(self, name: str, height: float, age_days: int,
                  growth_rate: float, color: str) -> None:
