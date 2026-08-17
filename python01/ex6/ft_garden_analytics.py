@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 class Plant:
-
     class Stats:
         def __init__(self) -> None:
             self._grow_calls = 0
@@ -157,13 +156,14 @@ if __name__ == "__main__":
     print("=== Garden statistics ===")
 
     print("=== Check year-old")
-
+    #old checker"
 
     print("=== Flower")
     f1.show()
     print("[statistics for Rose]")
     f1.show_plant_stats()
-    print("[asking the rose to bloom]")
+    print("[asking the rose to grow and bloom]")
+    f1.grow()
     f1.bloom()
     f1.show()
     print("[statistics for Rose]")
@@ -185,8 +185,8 @@ if __name__ == "__main__":
     print("[make sunflower grow, age and bloom]")
     #new function
     print("[statistics for Sunflower]")
-            #new function
+    #new function
 
     print("=== Anonymous")
     print("[statistics for Unknown plant]")
-            #new function
+    #new function
