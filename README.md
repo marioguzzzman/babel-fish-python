@@ -1,21 +1,30 @@
 # babel-fish-python
 
-42 Berlin Python track. Two modules, one continuous garden metaphor.
+42 Berlin Python track. Five modules; the garden metaphor runs through the first three, then the
+setting changes while the skills keep stacking.
 
 | Module | Subject title | What it teaches |
 |---|---|---|
 | [python00/](python00/) | *Growing Code — Python Fundamentals Through Garden Data* | Functions: input → transform → output |
 | [python01/](python01/) | *Code Cultivation — Object-Oriented Garden Systems* | Objects: things that hold state and behave |
+| [python02/](python02/) | *Garden Guardian — Data Engineering for Smart Agriculture* | Exceptions: the path your code takes when something fails |
+| [python03/](python03/) | *Data Quest — Mastering Python Collections* | Containers: choosing the right shape to hold many things |
+| [python04/](python04/) | *Data Archivist — Digital Preservation in the Cyber Archives* | Files and streams: talking to the world outside the process |
 
-**How to use this file.** The two module tables show *when* each idea appears. The Concepts
+**How to use this file.** The module tables show *when* each idea appears. The Concepts
 section groups them by *what problem they solve*, each with a minimal example. The error table
 maps a message you actually saw to the concept behind it — start there when something breaks.
+
+> **Note:** the Concepts section below currently covers python00–01 in depth. The python02–04
+> tables are the module maps; their subjects live in
+> [python02.md](python02/python02.md), [python03.md](python03/python03.md) and
+> [python04.md](python04/python04.md).
 
 ---
 
 ## The through-line
 
-The single most useful thing to understand about these two modules is that they teach
+The single most useful thing to understand about the first two modules is that they teach
 **two different units of organisation**.
 
 **python00's unit is the function.** A function is a transformation. Data goes in, something
@@ -37,6 +46,20 @@ arguments                       attributes
 "what does it return?"          "what does it remember?"
 independent exercises           one object, grown seven times
 ```
+
+The next three modules each add a dimension to code you already know how to write. None of them
+introduces a new unit of organisation — they change what your functions and objects have to
+survive contact with.
+
+```
+python02        the failure path      what happens when the input is wrong
+python03        the container         what shape holds many things at once
+python04        the outside world     what happens when data leaves the process
+```
+
+Put another way: python00–01 assume everything goes right and everything is in memory.
+python02 removes the first assumption, python04 removes the second, and python03 gives you the
+tools to handle more than one thing at a time in between.
 
 ---
 
@@ -86,6 +109,101 @@ Each step is motivated by a problem the previous step created. ex1's four separa
 lines are tedious and error-prone → ex3's constructor fixes it. ex3's constructor accepts any
 value including nonsense → ex4's validation fixes it. ex4's single `Plant` can't express a tree
 and a tomato → ex5's inheritance fixes it.
+
+---
+
+## python02 — Garden Guardian
+
+Constraint: **your programs must never crash.** Every exercise is a `try`/`except` exercise; the
+keywords `try`, `except`, `finally` and `raise` are language features, so they never appear in the
+authorized-functions list.
+
+| Ex | File | Concept introduced | Vocabulary |
+|---|---|---|---|
+| 0 | `ft_first_exception.py` | Catching a failure instead of dying from it | exception, `try`/`except`, catching, traceback, exception object |
+| 1 | `ft_raise_exception.py` | Signalling a failure yourself when the value is *valid but wrong* | `raise`, validation vs. conversion, domain range, error message |
+| 2 | `ft_different_errors.py` | Different failure kinds are different types; catching several at once | `ValueError`, `ZeroDivisionError`, `FileNotFoundError`, `TypeError`, exception tuple, multiple handlers |
+| 3 | `ft_custom_errors.py` | Your own exception types, arranged in a hierarchy | custom exception, subclassing `Exception`, default message, catching a base class |
+| 4 | `ft_finally_block.py` | Cleanup that runs whether or not it went wrong | `finally`, resource cleanup, acquire/release, early `return` inside `try` |
+
+**Arc:** catch → raise → distinguish → classify → clean up.
+
+Two ideas worth naming. First, ex4's inheritance is **the same mechanism as python01 ex5** —
+`PlantError(GardenError)` is `Tree(Plant)` — but used for classification rather than behaviour:
+catching `GardenError` catches every child, which is the *entire point* of putting them in a tree.
+
+Second, **`raise` is the mirror image of `return`.** Both end the function and hand something back
+to the caller. `return` hands back an answer up the normal path; `raise` hands back a problem up a
+separate path that keeps travelling until someone catches it. Exercise 1 is where this lands: the
+string `"100"` converts perfectly well — `int()` has no complaint — but 100 °C is not a temperature
+a plant survives, so *your* code is the only thing that can object.
+
+---
+
+## python03 — Data Quest
+
+Constraint: **no file I/O.** Everything in memory or from `sys.argv`. This is also the first module
+that uses `import`.
+
+| Ex | File | Concept introduced | Vocabulary |
+|---|---|---|---|
+| 0 | `ft_command_quest.py` | Arguments from outside the program; the list you didn't build | `import`, module, `sys.argv`, list, index, `len()` |
+| 1 | `ft_score_analytics.py` | Building a list by filtering; aggregating over it | append, filtering, `sum()`/`max()`/`min()`, aggregate, partial validity |
+| 2 | `ft_coordinate_system.py` | A fixed-size group of values that must not change | tuple, immutability, unpacking, retry loop, `math.sqrt()` |
+| 3 | `ft_achievement_tracker.py` | Membership and uniqueness as the whole point | set, uniqueness, union, intersection, difference, `random` |
+| 4 | `ft_inventory_system.py` | Lookup by name instead of by position | dict, key/value, parsing `k:v`, duplicate key, percentage of total |
+| 5 | `ft_data_stream.py` | Producing values on demand instead of all at once | generator, `yield`, `next()`, lazy evaluation, infinite sequence, consuming a generator |
+| 6 | `ft_data_alchemist.py` | Writing a whole transformation on one line | list comprehension, dict comprehension, filtering clause, condensed form |
+
+**Arc:** ordered → aggregated → immutable → unique → keyed → lazy → condensed.
+
+The four containers are not four syntaxes to memorise — they are four different answers to
+*"what do I need to do with this data?"*:
+
+```
+list      order matters, duplicates fine        scores in the order given
+tuple     fixed shape, must not change          (x, y, z)
+set       only membership matters               which achievements do you have
+dict      look it up by name                    sword → 3
+```
+
+Choose by the question you'll ask, not by which one you typed last time. That's the Twitter story
+in the subject's foreword: correct code, wrong container, linear time in production.
+
+Exercise 5 is the conceptual jump. Every container before it *holds* its values; a generator holds
+only the **instruction for producing the next one**. `gen_event()` is infinite yet costs nothing,
+because nothing exists until `next()` asks. This is the first time you write something that is a
+process rather than a thing.
+
+---
+
+## python04 — Data Archivist
+
+Constraint: **no `with` before ex3.** You open and close by hand first, so that the context manager
+in ex3 arrives as a solution to a problem you have already felt.
+
+| Ex | File | Concept introduced | Vocabulary |
+|---|---|---|---|
+| 0 | `ft_ancient_text.py` | Reading a file; failure modes that come from outside your program | `open()`, file object, `read()`, `close()`, `typing.IO`, `FileNotFoundError`, `PermissionError` |
+| 1 | `ft_archive_creation.py` | Writing; a mode that destroys what was there | write mode, truncation, transform-then-save, optional save |
+| 2 | `ft_stream_management.py` | The three standard channels a process is born with | stream, `sys.stdin`/`stdout`/`stderr`, `readline()`, `flush()`, redirection |
+| 3 | `ft_vault_security.py` | Cleanup that can't be forgotten; returning success alongside the result | `with`, context manager, `(bool, str)` return, default parameters |
+
+**Arc:** read → write → streams → guaranteed cleanup.
+
+This module is where python02 stops being an exercise topic and becomes unavoidable. Everything
+here fails for reasons that have nothing to do with your logic: the file isn't there, you don't
+have permission, the disk is full. A pure function can be proven correct; a file operation can only
+be *handled*.
+
+Two things to hold onto:
+
+- **`with` is `finally`, packaged.** python02 ex4 made you write the cleanup by hand. `with` is the
+  language noticing that "always close it, even on the error path" is the same four lines every
+  time, and making them disappear. It is the same idea, not a new one.
+- **`stderr` exists so that errors survive a pipe.** `print()` goes to stdout, which is what gets
+  redirected into the next program or a file. Sending errors there mixes complaints into the data.
+  That's what ex2's `[STDERR]` prefix is demonstrating.
 
 ---
 
