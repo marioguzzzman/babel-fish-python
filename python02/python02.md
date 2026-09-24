@@ -26,38 +26,11 @@ digital greenhouse thriving.
 
 ## Chapter I — Foreword
 
-Welcome to the world of agricultural data engineering!
-
-Building on your Python foundations (Module 00) and garden monitoring classes (Module 01), you're
-now ready to tackle the real challenges of smart agriculture. In modern farming, data flows like
-water through irrigation systems — sensor readings stream in continuously, weather APIs provide
-forecasts, and IoT devices monitor everything from soil pH to greenhouse humidity.
-
-But what happens when this data pipeline encounters turbulence? When sensors malfunction during
-harvest season? When network connections drop during critical monitoring periods? When corrupted
-data threatens to trigger false irrigation cycles?
-
-Professional agricultural data engineers know that robust systems aren't built to avoid failures —
-they're designed to **gracefully handle the unexpected**. Your digital greenhouse needs to be as
-resilient as nature itself.
-
 Python's exception handling system is your toolkit for building bulletproof agricultural data
 pipelines. You'll learn to catch sensor anomalies, create custom agricultural alerts, and ensure
 data integrity even when Mother Nature (or Murphy's Law) strikes.
 
-## Chapter II — AI Instructions
-
-*(Standard 42 AI-usage chapter — same boilerplate as the other modules: use AI to reduce tedious
-work, always understand and be able to defend anything you submit, and seek peer review.)*
-
 ## Chapter III — Introduction
-
-Welcome to Garden Guardian: Data Engineering for Smart Agriculture!
-
-Building on your garden monitoring foundation from previous projects, you'll now master the
-critical skills of resilient data pipeline engineering for agricultural systems.
-
-You'll discover:
 
 - How to validate and clean agricultural data streams in real-time
 - Which different failure modes exist in IoT sensor networks
@@ -67,12 +40,6 @@ You'll discover:
 
 Each exercise builds a component of your smart agriculture data platform, progressing from basic
 sensor validation to comprehensive agricultural monitoring systems.
-
-> **IMPORTANT:** This project focuses on agricultural data engineering. Your programs should
-> demonstrate how to build robust data pipelines that handle real-world farming scenarios
-> gracefully.
-
----
 
 ## Chapter IV — General Instructions
 
