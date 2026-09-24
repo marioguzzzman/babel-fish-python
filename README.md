@@ -15,10 +15,9 @@ setting changes while the skills keep stacking.
 section groups them by *what problem they solve*, each with a minimal example. The error table
 maps a message you actually saw to the concept behind it — start there when something breaks.
 
-> **Note:** the Concepts section below currently covers python00–01 in depth. The python02–04
+> **Note:** the Concepts section below currently covers python00–02 in depth. The python03–04
 > tables are the module maps; their subjects live in
-> [python02.md](python02/python02.md), [python03.md](python03/python03.md) and
-> [python04.md](python04/python04.md).
+> [python03.md](python03/python03.md) and [python04.md](python04/python04.md).
 
 ---
 
@@ -128,7 +127,7 @@ authorized-functions list.
 
 **Arc:** catch → raise → distinguish → classify → clean up.
 
-Two ideas worth naming. First, ex4's inheritance is **the same mechanism as python01 ex5** —
+Two ideas worth naming. First, ex3's inheritance is **the same mechanism as python01 ex5** —
 `PlantError(GardenError)` is `Tree(Plant)` — but used for classification rather than behaviour:
 catching `GardenError` catches every child, which is the *entire point* of putting them in a tree.
 
@@ -582,6 +581,146 @@ Or name a sub-expression: `answer = Plant.is_older_than_year(age)`, then interpo
 
 ---
 
+## 9 · When things go wrong (python02)
+
+**Transmitter and receiver.** `raise` *sends* an error; `except` *receives* it. They live in
+different functions. The function that detects the problem raises; the caller decides what the
+problem means.
+
+```
+input_temperature                 test_temperature
+┌──────────────────┐             ┌──────────────────────────┐
+│ 100 > 40 ?       │             │ try:                     │
+│   raise ValueError ─────────────▶ except ValueError as e:  │
+└──────────────────┘             │     print(... e)         │
+     TRANSMITTER                 └──────────────────────────┘
+                                        RECEIVER
+```
+
+**Why the callee must not catch its own error.** `-> int` is a promise. For `"abc"` there is no
+correct integer to return — `0` or `-1` would be a *false reading*, silently corrupting the data.
+A function that cannot keep its promise raises instead of pretending.
+
+```python
+def input_temperature(temp_str: str) -> int:
+    return int(temp_str)           # no try here — failure leaves on its own
+```
+
+**`raise` stops the function.** Nothing after it runs, nothing is returned. An uncaught raise
+travels all the way up and becomes a traceback — that *is* the crash.
+
+**A `try` only protects code that runs inside it.** A fuse box protects the sockets wired through
+it. A call to the same function outside the `try` is on the mains.
+
+**The exception object.** An error is a package: a **type** and a **message**. The last line of a
+traceback shows both — `ValueError: invalid literal for int() with base 10: 'abc'`. `as e` gives
+the package a name; `{e}` prints the message. Never hand-type a message Python already wrote — it
+will be wrong for the next input.
+
+```python
+except ValueError as e:
+    print(f"Caught input_temperature error: {e}")
+```
+
+`e` exists only inside its `except` block. Reading it anywhere else is a `NameError`.
+
+**Type vs. value.** Type is *what kind of thing*; value is *which one*. Wrong plug in the socket →
+`TypeError`. Right plug, wrong voltage → `ValueError`.
+
+| Code | Type OK? | Value OK? | Raises |
+|---|---|---|---|
+| `int("abc")` | ✅ `int()` accepts strings | ❌ not a number | `ValueError` |
+| `100` °C for a plant | ✅ it's an int | ❌ out of range | `ValueError` (yours) |
+| `int(None)`, `int([...])`, `"abc" + 50` | ❌ | — | `TypeError` |
+
+**The exception tree.** `except X` catches `X` **and every child of `X`**. `except Exception`
+catches almost everything — including your own bugs, which it then hides. Catch the narrowest
+type you expect.
+
+```
+Exception
+├── ValueError
+├── TypeError
+├── ZeroDivisionError
+└── GardenError            ← yours
+    ├── PlantError
+    └── WaterError
+```
+
+**Several types, one `try`.** Two forms, for two needs:
+
+```python
+try:                                   # separate handlers — each knows its own name
+    garden_operations(n)
+except ValueError as e:
+    print(f"Caught ValueError: {e}")
+except ZeroDivisionError as e:
+    print(f"Caught ZeroDivisionError: {e}")
+```
+
+```python
+try:                                   # grouped — one shared reaction,
+    garden_operations(n)               # but it can't say which one it caught
+except (ValueError, TypeError) as e:
+    print(f"Caught a data error: {e}")
+```
+
+No `type()` allowed means the *handler* supplies the name, which is why separate handlers are
+needed when the output must name the error.
+
+**`try` / `except` / `else` / `finally`.** Four branches of one junction:
+
+```
+try:       the risky call
+except:    runs only if it failed
+else:      runs only if it did NOT fail    ← the "success" message goes here
+finally:   runs ALWAYS — even after a return inside except
+```
+
+**Custom exceptions and the relay baton.** A custom exception is a label template: the class
+defines the *kind*, the raiser writes the *message*, and the default is only the fallback. The
+message must be passed up the chain with `super()` to `Exception`, which is what stores it for
+`{e}`. One class that drops the baton breaks the default message for every child below it.
+
+```python
+class GardenError(Exception):
+    def __init__(self, message: str = "Unknown garden error") -> None:
+        super().__init__(message)          # hand it up — don't just store it on self
+
+
+class PlantError(GardenError):
+    def __init__(self, message: str = "Unknown plant error") -> None:
+        super().__init__(message)
+
+raise PlantError(f"Invalid plant name to water: '{name}'")   # specific text: at the raise
+```
+
+Classes define; they never `print`. A `print` in a class body runs once when the file is read,
+before `main` — the first line of your output, uninvited.
+
+**`finally` survives `return`.** The function is already on its way out, and Python still stops
+to run the cleanup. That is the whole point: whoever leaves last switches the desk off.
+
+```python
+print("Opening watering system")
+try:
+    for plant in plants:           # loop INSIDE the try: one failure stops the run
+        water_plant(plant)
+except PlantError as e:
+    print(f"Caught PlantError: {e}")
+    return                         # leave immediately...
+finally:
+    print("Closing watering system")   # ...but this still runs
+```
+
+Put the `try` *inside* the loop instead and the system opens once and closes after every plant.
+
+**Code after the junction runs on both paths.** Anything placed after the whole `try`/`except`
+(at the same indent as `try`) runs whether it succeeded or failed — the right place for a blank
+line between tests.
+
+---
+
 # When something breaks
 
 ## Runtime errors → what they usually mean here
@@ -597,6 +736,13 @@ Or name a sub-expression: `answer = Plant.is_older_than_year(age)`, then interpo
 | `TypeError: 'type' object is not iterable` | you named the type (`list`) instead of building a container (`[a, b, c]`) |
 | prints `None` | a doer wrapped in `print()` |
 | prints nothing | an empty container — the loop ran zero times, silently |
+| `ValueError: invalid literal for int() with base 10` | right type, bad value — and you caught `TypeError` instead |
+| `UnboundLocalError` / `NameError` after an `except` | the variable was assigned in the `try` only; the `except` path never set it — or you read `e` outside its `except` |
+| `TypeError: int() argument must be ... not 'list'` | passed the whole container instead of the loop variable |
+| `RecursionError: maximum recursion depth exceeded` | a function calls itself by accident — feedback loop (e.g. `test_x()` inside `test_x`'s own print) |
+| traceback despite a `try` | the failing call sits outside the `try`, or the `except` names a different type than the one raised |
+| `{e}` prints an empty string | a custom exception stored the message on `self` but never passed it to `super().__init__()` |
+| output line appears before your header | a `print` in a class body — runs when the class is defined |
 
 ## flake8 codes
 
@@ -614,17 +760,27 @@ Or name a sub-expression: `answer = Plant.is_older_than_year(age)`, then interpo
 | `W291` / `W293` / `W391` / `W292` | trailing whitespace, whitespace on a blank line, blank lines at EOF, no newline at EOF |
 | `F821` | undefined name — catches read-before-assignment before you run anything |
 | `F541` | f-string with no placeholders |
+| `F841` | variable assigned but never used — e.g. `except X as e:` whose body never mentions `e` |
+| `E111` | indentation not a multiple of 4 |
+| `E225` | missing whitespace around an operator (`x =y`) |
 
 ## Checking your work
 
 ```bash
 python3 ft_whatever.py                  # does it run and produce the right output?
 python3 -m flake8 ft_whatever.py        # style: silent output means clean
-python3 -m mypy ft_whatever.py          # types
+python3 -m mypy --strict ft_whatever.py # types
 ```
 
 Run mypy **before** running the program — it catches missing `self`, wrong return types and
 undefined names without executing anything.
+
+Use `--strict`: plain `mypy` silently skips functions whose parameters have no hints, so a missing
+`temp_str: str` passes unnoticed. Always name the file — `mypy` alone prints
+`Missing target module, package, files, or command`.
+
+python02 ex2 is the one exception: the `TypeError` operation *must* fail mypy (`Unsupported
+operand types for +`). That error is the exercise working, not a bug.
 
 ---
 
@@ -643,3 +799,8 @@ Personal to this repo, tracked in [CLAUDE.md](CLAUDE.md). Worth checking for by 
 6. **Class instead of instance** — `Plant.show()`, `garden.show()`, `Plant.Stats.add_show()`. When
    you type a capital letter before a dot, ask whether you meant an object.
 7. **Declared but ignored parameters** — a value in the signature that the body hardcodes anyway.
+   python02 version: an exception's `__init__` receives `message`, then passes a fixed string to
+   `super()` instead.
+8. **Catching in the wrong place** — the try/except inside the function that fails, instead of in
+   its caller. If the function then has to `return` a made-up value (`return 1`), that's the sign.
+9. **Hand-typed error messages** — typing the text Python already put in `e`. Use `{e}`.
