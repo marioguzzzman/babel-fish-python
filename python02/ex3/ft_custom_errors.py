@@ -42,7 +42,6 @@ def test_all_plant_errors() -> None:
     except GardenError as e:
         print(f"Caught GardenError: {e}")
     try:
-        print("Testing catching all garden errors...")
         test_water_error()
     except GardenError as e:
         print(f"Caught GardenError: {e}")
@@ -53,5 +52,4 @@ if __name__ == "__main__":
     print("=== Custom Garden Errors Demo ===")
     print()
     test_all_plant_errors()
-    print()
     print("All custom error types work correctly!")
